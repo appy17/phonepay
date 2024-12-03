@@ -32,7 +32,7 @@ app.post("/create-order", async (req, res) => {
   const { name, mobileNumber, amount } = req.body;
   const orderId = uuidv4();
 
-  //payment
+
   const paymentPayload = {
     merchantId: MERCHANT_ID,
     merchantUserId: name,
@@ -46,9 +46,7 @@ app.post("/create-order", async (req, res) => {
     },
   };
 
-  const payload = Buffer.from(JSON.stringify(paymentPayload)).toString(
-    "base64"
-  );
+  const payload = Buffer.from(JSON.stringify(paymentPayload)).toString("base64");
   const keyIndex = 1;
   const string = payload + "/pg/v1/pay" + MERCHANT_KEY;
   const sha256 = crypto.createHash("sha256").update(string).digest("hex");
@@ -89,7 +87,7 @@ app.post("/status", async (req, res) => {
   const checksum = sha256 + "###" + keyIndex;
 
   const option = {
-    method: "GET",
+    method: "GET",    //GET
     url: `${MERCHANT_STATUS_URL}/${MERCHANT_ID}/${merchantTransactionId}`,
     headers: {
       accept: "application/json",
@@ -97,9 +95,13 @@ app.post("/status", async (req, res) => {
       "X-VERIFY": checksum,
       "X-MERCHANT-ID": MERCHANT_ID,
     },
+    data:{
+      request: payload
+    }
   };
 
   axios.request(option).then((response) => {
+    console.log(response.data)
     if (response.data.success === true) {
       return res.redirect(successUrl);
     } else {
